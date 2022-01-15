@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: testApp
+  kafka:
+    producer:
+      transaction-id-prefix: Oopps
+      properties:
+        enable.idempotence: true
+      value-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+  cloud.stream:
+    function:
+      definition: testStreamController
+    kafka:
+      streams.binder:
+        deserialization-exception-handler: logAndContinue
+        configuration:
+          processing.guarantee: exactly_once_v2
+          default.value.serde: org.springframework.kafka.support.serializer.JsonSerde
+        functions:
+          testStreamController:
+            applicationId: test-app-testStreamController
+
+  main:
+    banner-mode: "off"
+
+spring.cloud.stream.function.bindings:
+  testStreamController-in-0:
+    destination: my-topic-in
+    consumer.materializedAs: my-store
+  testStreamController-out-0:
+    destination: my-topic-out
